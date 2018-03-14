@@ -38,7 +38,7 @@ public class registerService extends Service {
                 person = (Person) temp;
             }
             else{
-                return new Model("Person of User not added");
+                return temp;
             }
             user.setPersonid(person.getId());
             temp = uDao.updateUser(user);

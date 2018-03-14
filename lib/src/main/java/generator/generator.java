@@ -70,7 +70,7 @@ public class generator {
 
     private ArrayList<Model> generatePeople(User descendant, int generation){
         if(generation >= totgenerations)
-            return new ArrayList<Model>();
+            return new ArrayList<>();
         ArrayList<Model> husbandParents = generatePeople(descendant,generation+1);
         ArrayList<Model> wifeParents = generatePeople(descendant,generation+1);
         String[] data = {descendant.getId(),descendant.getPersonid(),mnames.getName(),snames.getName(),"m"};
@@ -122,8 +122,8 @@ public class generator {
         wife.setSpouse(husband.getId());
         ArrayList<Model> couple = new ArrayList<>();
         try {
-            personDao.updatePerson(husband);
-            personDao.updatePerson(wife);
+            personDao.updatePersonSpouse(husband);
+            personDao.updatePersonSpouse(wife);
         }
         catch (SQLException e){
             System.err.println("Husband/Wife pair not updated");

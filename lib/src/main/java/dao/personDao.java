@@ -25,9 +25,10 @@ import model.people;
 public class personDao extends Dao {
 
     public static Model addUser(User user) throws SQLException{
+        personDao personDao = new personDao();
         Person person = new Person(user);
         person.setDescendant_id("temp");
-        if(!addPerson(person).equals("Person added to table"))
+        if(!addPerson(person).getClass().equals(Person.class))
             return new Model("User not added to people table");
         Connection connect = Dao.connect();
         if(connect == null)
@@ -57,11 +58,7 @@ public class personDao extends Dao {
         }
         person = new Person(data.toArray());
         person.setDescendant_id(person.getId());
-        removePerson(person.getId());
-        if(!addPerson(person).equals("Person added to table"))
-            return new Model("User not added to people table");
-
-        return person;
+        return personDao.updatePersonDescendant(person);
 
     }
 
@@ -224,14 +221,46 @@ public class personDao extends Dao {
 
     }
 
-    public Model updatePerson(Person person) throws SQLException{
+    public Model updatePersonDescendant(Person person) throws SQLException{
         Connection connect = connect();
         if(connect == null){
             throw new NullPointerException();
         }
 
         try{
-            PreparedStatement state = connect.prepareStatement("UPDATE users set spouse = ? where id = ?;");
+            PreparedStatement state = connect.prepareStatement("UPDATE people SET descendant_id = ? where id = ?");
+            state.setString(1,person.getDescendant());
+            state.setString(2,person.getId());
+            state.addBatch();
+            connect.setAutoCommit(false);
+            state.executeBatch();
+            connect.setAutoCommit(true);
+        }
+        catch (SQLException e){
+            System.err.println(e.getMessage());
+            e.printStackTrace();
+            return new Model("Person not updated");
+        }
+
+        try{
+            connect.close();
+        }
+        catch (SQLException e){
+            System.err.println("Connection not closed");
+            e.printStackTrace();
+        }
+        person = getPerson(person.getId());
+        return person;
+    }
+
+    public Model updatePersonSpouse(Person person) throws SQLException{
+        Connection connect = connect();
+        if(connect == null){
+            throw new NullPointerException();
+        }
+
+        try{
+            PreparedStatement state = connect.prepareStatement("UPDATE people set spouse = ? where id = ?;");
             state.setString(1,person.getSpouse());
             state.setString(2,person.getId());
             state.addBatch();
@@ -240,6 +269,7 @@ public class personDao extends Dao {
             connect.setAutoCommit(true);
         }
         catch (SQLException e){
+            System.err.println(e.getErrorCode());
             return new Model("Person not updated");
         }
 
